@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  redis:
+    image: redis:latest
+
+  GoDeliver:
+    build: .
+    environment:
+      - DOCKER_API_VERSION=1.43
+    ports:
+      - 3000:3000 # Change 8000 to the desired port (8100 in this example)
+    volumes:
+      - ./:/GoDeliver
