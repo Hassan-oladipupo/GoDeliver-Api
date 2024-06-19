@@ -26,10 +26,22 @@ class OrderDetails
     private ?string $landMark = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $Area = null;
+    private ?string $area = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $apartmentNumber = null;
+
+    #[ORM\ManyToOne(targetEntity: RiderDetails::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?RiderDetails $rider = null;
+
+    #[ORM\OneToOne(inversedBy: 'order', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?DeliveryDetails $deliveryDetails = null;
+
+    #[ORM\ManyToOne(inversedBy: 'orderDetails')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -44,7 +56,6 @@ class OrderDetails
     public function setCustomerName(string $customerName): static
     {
         $this->customerName = $customerName;
-
         return $this;
     }
 
@@ -56,7 +67,6 @@ class OrderDetails
     public function setPickupContactNo(string $pickupContactNo): static
     {
         $this->pickupContactNo = $pickupContactNo;
-
         return $this;
     }
 
@@ -68,7 +78,6 @@ class OrderDetails
     public function setPickupAddress(string $pickupAddress): static
     {
         $this->pickupAddress = $pickupAddress;
-
         return $this;
     }
 
@@ -80,19 +89,17 @@ class OrderDetails
     public function setLandMark(?string $landMark): static
     {
         $this->landMark = $landMark;
-
         return $this;
     }
 
     public function getArea(): ?string
     {
-        return $this->Area;
+        return $this->area;
     }
 
-    public function setArea(?string $Area): static
+    public function setArea(?string $area): static
     {
-        $this->Area = $Area;
-
+        $this->area = $area;
         return $this;
     }
 
@@ -104,7 +111,39 @@ class OrderDetails
     public function setApartmentNumber(?string $apartmentNumber): static
     {
         $this->apartmentNumber = $apartmentNumber;
+        return $this;
+    }
 
+    public function getRider(): ?RiderDetails
+    {
+        return $this->rider;
+    }
+
+    public function setRider(?RiderDetails $rider): static
+    {
+        $this->rider = $rider;
+        return $this;
+    }
+
+    public function getDelivery(): ?DeliveryDetails
+    {
+        return $this->deliveryDetails;
+    }
+
+    public function setDelivery(?DeliveryDetails $delivery): static
+    {
+        $this->deliveryDetails = $delivery;
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
         return $this;
     }
 }

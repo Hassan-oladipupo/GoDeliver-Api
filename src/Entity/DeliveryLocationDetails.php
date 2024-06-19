@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\DeliveryPointDetailsRepository;
+use App\Repository\DeliveryLocationDetailsRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: DeliveryPointDetailsRepository::class)]
-class DeliveryPointDetails
+#[ORM\Entity(repositoryClass: DeliveryLocationDetailsRepository::class)]
+class DeliveryLocationDetails
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

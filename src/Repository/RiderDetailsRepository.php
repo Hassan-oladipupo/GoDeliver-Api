@@ -2,21 +2,21 @@
 
 namespace App\Repository;
 
-use App\Entity\OrderDetails;
+use App\Entity\RiderDetails;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<OrderDetails>
+ * @extends ServiceEntityRepository<RiderDetails>
  */
-class OrderDetailsRepository extends ServiceEntityRepository
+class RiderDetailsRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, OrderDetails::class);
+        parent::__construct($registry, RiderDetails::class);
     }
 
-    public function save(OrderDetails $entity, bool $flush = false): void
+    public function save(RiderDetails $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -27,7 +27,7 @@ class OrderDetailsRepository extends ServiceEntityRepository
 
 
 
-    public function remove(OrderDetails $entity, bool $flush = false): void
+    public function remove(RIderDetails $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -37,24 +37,24 @@ class OrderDetailsRepository extends ServiceEntityRepository
     }
 
     //    /**
-    //     * @return OrderDetails[] Returns an array of OrderDetails objects
+    //     * @return RiderDetails[] Returns an array of RiderDetails objects
     //     */
     //    public function findByExampleField($value): array
     //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
+    //        return $this->createQueryBuilder('r')
+    //            ->andWhere('r.exampleField = :val')
     //            ->setParameter('val', $value)
-    //            ->orderBy('o.id', 'ASC')
+    //            ->orderBy('r.id', 'ASC')
     //            ->setMaxResults(10)
     //            ->getQuery()
     //            ->getResult()
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?OrderDetails
+    //    public function findOneBySomeField($value): ?RiderDetails
     //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
+    //        return $this->createQueryBuilder('r')
+    //            ->andWhere('r.exampleField = :val')
     //            ->setParameter('val', $value)
     //            ->getQuery()
     //            ->getOneOrNullResult()
