@@ -1,14 +1,21 @@
-version: '3'
-
+version: '3.8'
 services:
-  redis:
-    image: redis:latest
+  mysql:
+    image: mariadb:10.8.3
 
-  GoDeliver:
-    build: .
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
     environment:
-      - DOCKER_API_VERSION=1.43
+      MYSQL_ROOT_PASSWORD: root
     ports:
-      - 3000:3000 # Change 8000 to the desired port (8100 in this example)
-    volumes:
-      - ./:/GoDeliver
+      - 3307:3307
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+  mailer:
+    image: schickling/mailcatcher
+    ports:
+      - 1080:1080
+      - 1025:1025

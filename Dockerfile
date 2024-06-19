@@ -20,5 +20,4 @@ WORKDIR /GoDeliver/
 COPY . .
 EXPOSE 3000
 
-# Start the server using the Symfony Runtime
 CMD ["symfony", "server:start", "--no-tls", "--port=3000", "--dir=public"]
