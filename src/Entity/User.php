@@ -2,39 +2,37 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
-    private ?string $email = null;
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $username = null;
 
-    /**
-     * @var list<string> The user roles
-     */
-    #[ORM\Column]
+    #[ORM\Column(length: 180)]
+    private ?string $firstName = null;
+
+    #[ORM\Column(length: 180)]
+    private ?string $lastName = null;
+
+    #[ORM\Column(type: 'json')]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: UserProfile::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?UserProfile $userProfile = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
@@ -43,9 +41,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private bool $confirmed = false;
 
-    /**
-     * @var Collection<int, OrderDetails>
-     */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: OrderDetails::class)]
     private Collection $orderDetails;
 
@@ -59,20 +54,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
-    public function getEmail(): ?string
+    public function getUserName(): ?string
     {
-        return $this->email;
+        return $this->username;
     }
 
-    public function setEmail(string $email): static
+    public function setUserName(string $username): static
     {
-        $this->email = $email;
+        $this->username = $username;
         return $this;
     }
 
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return (string) $this->username;
     }
 
     public function getRoles(): array
@@ -108,9 +103,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->userProfile;
     }
 
-    public function setUserProfile(UserProfile $userProfile): static
+    public function setUserProfile(?UserProfile $userProfile): static
     {
-        if ($userProfile->getUser() !== $this) {
+        if ($userProfile !== null) {
             $userProfile->setUser($this);
         }
         $this->userProfile = $userProfile;
@@ -127,6 +122,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->confirmationToken = $confirmationToken;
     }
 
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(?string $firstName): void
+    {
+        $this->firstName = $firstName;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(?string $lastName): void
+    {
+        $this->lastName = $lastName;
+    }
+
     public function isConfirmed(): bool
     {
         return $this->confirmed;
@@ -137,8 +152,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->confirmed = $confirmed;
     }
 
+    #[ORM\PrePersist]
+    public function initializeConfirmationToken(): void
+    {
+        if ($this->confirmationToken === null) {
+            $this->confirmationToken = bin2hex(random_bytes(32));
+        }
+    }
+
     /**
-     * @return Collection<int, OrderDetails>
+     * @return Collection<OrderDetails>
      */
     public function getOrderDetails(): Collection
     {
