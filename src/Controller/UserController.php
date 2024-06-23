@@ -3,14 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Security\JWTManager;
 use Psr\Log\LoggerInterface;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -18,14 +19,24 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 
 
+
 class UserController extends AbstractController
 {
     private $logger;
+    private $entityManager;
+    private $jwtManager;
 
-    public function __construct(LoggerInterface $logger)
+
+
+
+    public function __construct(EntityManagerInterface $entityManager, JWTManager $jwtManager, LoggerInterface $logger)
     {
+        $this->entityManager = $entityManager;
+        $this->jwtManager = $jwtManager;
         $this->logger = $logger;
     }
+
+
 
 
     #[Route('/api/v1/register', name: 'api_register', methods: ['POST'])]
@@ -128,7 +139,7 @@ class UserController extends AbstractController
 
 
     #[Route('/api/v1/login', name: 'app_auth_login', methods: ['POST'])]
-    public function login(AuthenticationUtils $authenticationUtils, Security $security, JWTTokenManagerInterface $jwtManager): Response
+    public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
         $error = $authenticationUtils->getLastAuthenticationError();
 
@@ -141,19 +152,29 @@ class UserController extends AbstractController
 
             return new JsonResponse(['error' => $errorMessage], 401);
         }
-        /** @var User $user */
-        $user = $this->getUser();
-        if (!$user) {
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['username']) || !isset($data['password'])) {
+            return new JsonResponse(['error' => 'Username and password are required.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $username = $data['username'];
+        $password = $data['password'];
+
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $username]);
+
+        if (!$user || !password_verify($password, $user->getPassword())) {
             return $this->json(['error' => 'Invalid credentials.'], Response::HTTP_UNAUTHORIZED);
         }
-        $userId = $user->getId();
-        $token = $jwtManager->create($user, ['user_id' => $userId]);
+
+        $token = $this->jwtManager->createJwt($user);
 
         return $this->json([
             'message' => 'Login successful',
-            'access_token' => $token,
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName(),
+            'access_token' => $token,
         ]);
     }
 
