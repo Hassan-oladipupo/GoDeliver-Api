@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Security\JWTManager;
 use Psr\Log\LoggerInterface;
+use App\Service\TokenGenerator;
 use App\Repository\UserRepository;
+use App\Security\PasswordHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,23 +19,26 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-
-
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 
 class UserController extends AbstractController
 {
     private $logger;
     private $entityManager;
     private $jwtManager;
+    private $tokenService;
+    private $isValidPassword;
 
 
 
 
-    public function __construct(EntityManagerInterface $entityManager, JWTManager $jwtManager, LoggerInterface $logger)
+    public function __construct(TokenGenerator $tokenService, EntityManagerInterface $entityManager, JWTManager $jwtManager, LoggerInterface $logger, PasswordHelper $isValidPassword)
     {
         $this->entityManager = $entityManager;
         $this->jwtManager = $jwtManager;
         $this->logger = $logger;
+        $this->tokenService = $tokenService;
+        $this->isValidPassword = $isValidPassword;
     }
 
 
@@ -54,8 +59,8 @@ class UserController extends AbstractController
         }
 
         $password = $data['password'];
-
-        if (!$this->isValidPassword($password)) {
+        $validPassword = $this->isValidPassword->validatePassword($password);
+        if (!$validPassword) {
             return new JsonResponse(['message' => 'Weak password. Password must contain at least 8 characters including uppercase, lowercase and digit'], 400);
         }
 
@@ -101,6 +106,8 @@ class UserController extends AbstractController
         ], 201);
     }
 
+
+
     #[Route('/api/v1/confirm-email', name: 'api_confirm_email', methods: ['POST'])]
     public function confirmEmail(Request $request, UserRepository $repo, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -136,6 +143,8 @@ class UserController extends AbstractController
             return new JsonResponse(['message' => 'An error occurred during email confirmation: ' . $e->getMessage()], 500);
         }
     }
+
+
 
 
     #[Route('/api/v1/login', name: 'app_auth_login', methods: ['POST'])]
@@ -186,18 +195,60 @@ class UserController extends AbstractController
 
 
 
-    private function isValidPassword($password)
+    #[Route('/api/v1/forgot-password', name: 'app_forgot_password', methods: ['POST'])]
+    public function forgotPassword(Request $request): JsonResponse
     {
-        $minLength = 8;
-        $hasUpperCase = preg_match('/[A-Z]/', $password);
-        $hasLowerCase = preg_match('/[a-z]/', $password);
-        $hasDigits = preg_match('/\d/', $password);
+        $email = json_decode($request->getContent(), true);
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $email]);
 
-        return (
-            strlen($password) >= $minLength &&
-            $hasUpperCase &&
-            $hasLowerCase &&
-            $hasDigits
-        );
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found.'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $token = $this->tokenService->generateConfirmEmailToken($user);
+
+
+        return new JsonResponse(['message' => 'Password reset token generated.', 'reset_Password_token' => $token], JsonResponse::HTTP_OK);
+    }
+
+
+
+    #[Route('/api/v1/reset-password', name: 'app_reset_password', methods: ['POST'])]
+    public function resetPassword(Request $request, UserPasswordHasherInterface $userPasswordHasher,): JsonResponse
+    {
+
+        $data = json_decode($request->getContent(), true);
+        $token = $data['token'];
+        $newPassword = $data['new_password'];
+        $confirmPassword = $data['confirm_password'];
+
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['resetToken' => $token]);
+
+        if (!$user || $user->getResetTokenExpiresAt() < new \DateTime()) {
+            return new JsonResponse(['error' => 'Invalid or expired token.'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $validPassword = $this->isValidPassword->validatePassword($newPassword);
+        if (!$validPassword) {
+            return new JsonResponse(['message' => 'Weak password. Password must contain at least 8 characters including uppercase, lowercase and digit'], 400);
+        }
+
+        if ($newPassword != $confirmPassword) {
+            return new JsonResponse(['message' => 'New password and confirm password do not match'], 400);
+        }
+
+        $hashedPassword = $userPasswordHasher->hashPassword($user, $newPassword);
+
+
+        $user->setPassword($hashedPassword);
+
+
+        $user->setResetToken(null);
+
+        $user->setResetTokenExpiresAt(null);
+
+        $this->entityManager->flush();
+
+        return new JsonResponse(['message' => 'Password reset successful.'], JsonResponse::HTTP_OK);
     }
 }

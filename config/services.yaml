@@ -24,3 +24,7 @@ services:
             - '@lexik_jwt_authentication.encoder'
             - '@event_dispatcher'
         public: true
+
+    App\Service\TokenGenerator:
+        arguments:
+            $entityManager: '@doctrine.orm.entity_manager'    

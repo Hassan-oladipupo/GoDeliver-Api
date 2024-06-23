@@ -36,6 +36,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?UserProfile $userProfile = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $resetToken = null;
+
+    #[ORM\Column(type: 'datetime', length: 255, nullable: true)]
+    private ?\DateTimeInterface $resetTokenExpiresAt = null;
+
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $confirmationToken = null;
 
     #[ORM\Column(type: 'boolean')]
@@ -184,6 +191,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $orderDetail->setUser(null);
             }
         }
+        return $this;
+    }
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): self
+    {
+        $this->resetToken = $resetToken;
+
+        return $this;
+    }
+
+    public function getResetTokenExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->resetTokenExpiresAt;
+    }
+
+    public function setResetTokenExpiresAt(?\DateTimeInterface $resetTokenExpiresAt): self
+    {
+        $this->resetTokenExpiresAt = $resetTokenExpiresAt;
+
         return $this;
     }
 }
