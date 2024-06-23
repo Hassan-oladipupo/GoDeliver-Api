@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTManager as BaseJWTManager;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
@@ -21,10 +22,17 @@ class JWTManager extends BaseJWTManager
 
     public function createJwt(UserInterface $user): string
     {
+        if (!$user instanceof User) {
+            throw new \InvalidArgumentException('User must be an instance of App\Entity\User');
+        }
+
+        $userProfile = $user->getUserProfile();
+
         $payload = [
+            'user_id' => $user->getId(),
             'username' => $user->getUserIdentifier(),
-            'roles' => $user->getRoles(),
-            'exp' => time() + 3600,
+            'profileImage' => $userProfile ? $userProfile->getProfileImage() : null,
+
         ];
 
         $jwtEvent = new JWTCreatedEvent($payload, $user);
