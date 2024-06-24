@@ -74,7 +74,7 @@ class ProfileSettingController extends AbstractController
 
     #[Route('api/v1/user-profile', name: 'app_get_user_profile', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function getUserProfile(): JsonResponse
+    public function retrieveUserProfile(): JsonResponse
     {
         try {
             if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
