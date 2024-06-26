@@ -84,7 +84,9 @@ class UserController extends AbstractController
         if (!empty($data['lastName'])) {
             $user->setLastName($data['lastName']);
         }
-
+        if (!empty($data['roles'])) {
+            $user->setRoles($data['roles']);
+        }
         $errors = $validator->validate($user);
 
         if (count($errors) > 0) {
@@ -103,6 +105,7 @@ class UserController extends AbstractController
             'confirmation_token' => $confirmationToken,
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName(),
+            'user_roles' => $user->getRoles(),
         ], 201);
     }
 
@@ -184,6 +187,7 @@ class UserController extends AbstractController
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName(),
             'access_token' => $token,
+            'user_roles' => $user->getRoles(),
         ]);
     }
 

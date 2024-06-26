@@ -4,50 +4,56 @@ namespace App\Entity;
 
 use App\Repository\OrderDetailsRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OrderDetailsRepository::class)]
 class OrderDetails
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: "integer")]
+    private ?int $orderId = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank()]
     private ?string $customerName = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank()]
     private ?string $pickupContactNo = null;
 
     #[ORM\Column(length: 500)]
+    #[Assert\NotBlank()]
     private ?string $pickupAddress = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $landMark = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $area = null;
+    #[ORM\Column(length: 255)]
+    private ?string $state = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $location = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $apartmentNumber = null;
 
-    #[ORM\ManyToOne(targetEntity: RiderDetails::class)]
+    #[ORM\ManyToOne(targetEntity: RiderDetails::class, cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank()]
     private ?RiderDetails $rider = null;
 
-    #[ORM\OneToOne(inversedBy: 'order', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?DeliveryDetails $deliveryDetails = null;
 
-    #[ORM\ManyToOne(inversedBy: 'orderDetails')]
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orderDetails')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
+    public function getOrderId(): ?int
+    {
+        return $this->orderId;
+    }
     public function getCustomerName(): ?string
     {
         return $this->customerName;
@@ -92,14 +98,25 @@ class OrderDetails
         return $this;
     }
 
-    public function getArea(): ?string
+    public function getState(): ?string
     {
-        return $this->area;
+        return $this->state;
     }
 
-    public function setArea(?string $area): static
+    public function setState(string $state): static
     {
-        $this->area = $area;
+        $this->state = $state;
+        return $this;
+    }
+
+    public function getLocation(): ?string
+    {
+        return $this->location;
+    }
+
+    public function setLocation(string $location): static
+    {
+        $this->location = $location;
         return $this;
     }
 
@@ -125,16 +142,7 @@ class OrderDetails
         return $this;
     }
 
-    public function getDelivery(): ?DeliveryDetails
-    {
-        return $this->deliveryDetails;
-    }
 
-    public function setDelivery(?DeliveryDetails $delivery): static
-    {
-        $this->deliveryDetails = $delivery;
-        return $this;
-    }
 
     public function getUser(): ?User
     {
