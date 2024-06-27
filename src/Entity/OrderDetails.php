@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\OrderDetailsRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\OrderDetailsRepository;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OrderDetailsRepository::class)]
@@ -43,11 +44,31 @@ class OrderDetails
     #[Assert\NotBlank()]
     private ?RiderDetails $rider = null;
 
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank()]
+    private ?string $deliveryFee = null;
 
+
+    #[ORM\Column(type: 'datetime')]
+    private ?DateTime $startTime = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?DateTime $endTime = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $orderStatus = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orderDetails')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+
+
+    public function __construct()
+    {
+        $this->startTime = new DateTime();
+        $this->orderStatus = 'pending';
+    }
+
 
 
     public function getOrderId(): ?int
@@ -62,6 +83,17 @@ class OrderDetails
     public function setCustomerName(string $customerName): static
     {
         $this->customerName = $customerName;
+        return $this;
+    }
+
+    public function getDeliveryFee(): ?string
+    {
+        return $this->deliveryFee;
+    }
+
+    public function setDeliveryFee(string $deliveryFee): static
+    {
+        $this->deliveryFee = $deliveryFee;
         return $this;
     }
 
@@ -152,6 +184,40 @@ class OrderDetails
     public function setUser(?User $user): static
     {
         $this->user = $user;
+        return $this;
+    }
+
+
+    public function getStartTime(): ?DateTime
+    {
+        return $this->startTime;
+    }
+
+    public function setStartTime(DateTime $startTime): static
+    {
+        $this->startTime = $startTime;
+        return $this;
+    }
+
+    public function getEndTime(): ?DateTime
+    {
+        return $this->endTime;
+    }
+
+    public function setEndTime(?DateTime $endTime): static
+    {
+        $this->endTime = $endTime;
+        return $this;
+    }
+
+    public function getOderStatus(): ?string
+    {
+        return $this->orderStatus;
+    }
+
+    public function setOrderStatus(string $status): static
+    {
+        $this->orderStatus = $status;
         return $this;
     }
 }

@@ -14,32 +14,12 @@ class DeliveryDetails
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-
-
-    #[ORM\Column(type: 'datetime')]
-    private ?DateTime $startTime = null;
-
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?DateTime $endTime = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $status = null;
-
     #[ORM\Column(length: 255)]
     private ?string $state = null;
-
     #[ORM\Column(length: 255)]
     private ?string $location = null;
-
-
     #[ORM\Column(length: 255)]
     private ?string $deliveryFee = null;
-
-    public function __construct()
-    {
-        $this->startTime = new DateTime();
-    }
-
 
     public function getId(): ?int
     {
@@ -66,39 +46,6 @@ class DeliveryDetails
     public function setLocation(string $location): static
     {
         $this->location = $location;
-        return $this;
-    }
-
-    public function getStartTime(): ?DateTime
-    {
-        return $this->startTime;
-    }
-
-    public function setStartTime(DateTime $startTime): static
-    {
-        $this->startTime = $startTime;
-        return $this;
-    }
-
-    public function getEndTime(): ?DateTime
-    {
-        return $this->endTime;
-    }
-
-    public function setEndTime(?DateTime $endTime): static
-    {
-        $this->endTime = $endTime;
-        return $this;
-    }
-
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(string $status): static
-    {
-        $this->status = $status;
         return $this;
     }
 
