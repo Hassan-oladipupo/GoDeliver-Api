@@ -4,10 +4,10 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -32,15 +32,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\OneToOne(targetEntity: UserProfile::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?UserProfile $userProfile = null;
+
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?UserDeliveryDetails $userDeliveryDetails = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $resetToken = null;
 
     #[ORM\Column(type: 'datetime', length: 255, nullable: true)]
     private ?\DateTimeInterface $resetTokenExpiresAt = null;
-
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $confirmationToken = null;
@@ -61,12 +63,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
-    public function getUserName(): ?string
+    public function getUsername(): ?string
     {
         return $this->username;
     }
 
-    public function setUserName(string $username): static
+    public function setUsername(string $username): static
     {
         $this->username = $username;
         return $this;
@@ -202,7 +204,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setResetToken(?string $resetToken): self
     {
         $this->resetToken = $resetToken;
-
         return $this;
     }
 
@@ -214,6 +215,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setResetTokenExpiresAt(?\DateTimeInterface $resetTokenExpiresAt): self
     {
         $this->resetTokenExpiresAt = $resetTokenExpiresAt;
+        return $this;
+    }
+
+    public function getUserDeliveryDetails(): ?UserDeliveryDetails
+    {
+        return $this->userDeliveryDetails;
+    }
+
+    public function setUserDeliveryDetails(?UserDeliveryDetails $userDeliveryDetails): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($userDeliveryDetails === null && $this->userDeliveryDetails !== null) {
+            $this->userDeliveryDetails->setUser(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($userDeliveryDetails !== null && $userDeliveryDetails->getUser() !== $this) {
+            $userDeliveryDetails->setUser($this);
+        }
+
+        $this->userDeliveryDetails = $userDeliveryDetails;
 
         return $this;
     }

@@ -3,20 +3,21 @@
 namespace App\Repository;
 
 use App\Entity\DeliveryDetails;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Entity\UserDeliveryDetails;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<DeliveryDetails>
  */
-class DeliveryDetailsRepository extends ServiceEntityRepository
+class UserDeliveryDetailsRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, DeliveryDetails::class);
+        parent::__construct($registry, UserDeliveryDetails::class);
     }
 
-    public function save(DeliveryDetails $entity, bool $flush = false): void
+    public function save(UserDeliveryDetails $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -27,7 +28,7 @@ class DeliveryDetailsRepository extends ServiceEntityRepository
 
 
 
-    public function remove(DeliveryDetails $entity, bool $flush = false): void
+    public function remove(UserDeliveryDetails $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 

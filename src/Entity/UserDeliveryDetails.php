@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\DeliveryLocationDetailsRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserDeliveryDetailsRepository;
 
-#[ORM\Entity(repositoryClass: DeliveryLocationDetailsRepository::class)]
-class DeliveryLocationDetails
+#[ORM\Entity(repositoryClass: UserDeliveryDetailsRepository::class)]
+class UserDeliveryDetails
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -31,6 +31,9 @@ class DeliveryLocationDetails
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $apartmentNumber = null;
 
+    #[ORM\OneToOne(inversedBy: 'userDeliveryDetails', cascade: ['persist', 'remove'])]
+    private ?User $user = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -44,7 +47,6 @@ class DeliveryLocationDetails
     public function setRecipientPhoneNumber(string $recipientPhoneNumber): static
     {
         $this->recipientPhoneNumber = $recipientPhoneNumber;
-
         return $this;
     }
 
@@ -56,7 +58,6 @@ class DeliveryLocationDetails
     public function setRecipientAddress(string $recipientAddress): static
     {
         $this->recipientAddress = $recipientAddress;
-
         return $this;
     }
 
@@ -68,7 +69,6 @@ class DeliveryLocationDetails
     public function setCategory(string $category): static
     {
         $this->category = $category;
-
         return $this;
     }
 
@@ -80,7 +80,6 @@ class DeliveryLocationDetails
     public function setLandMark(?string $landMark): static
     {
         $this->landMark = $landMark;
-
         return $this;
     }
 
@@ -92,7 +91,6 @@ class DeliveryLocationDetails
     public function setArea(?string $Area): static
     {
         $this->Area = $Area;
-
         return $this;
     }
 
@@ -104,7 +102,17 @@ class DeliveryLocationDetails
     public function setApartmentNumber(?string $apartmentNumber): static
     {
         $this->apartmentNumber = $apartmentNumber;
+        return $this;
+    }
 
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
         return $this;
     }
 }

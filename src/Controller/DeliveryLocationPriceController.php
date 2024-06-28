@@ -5,10 +5,11 @@ namespace App\Controller;
 use Exception;
 use Psr\Log\LoggerInterface;
 use App\Entity\DeliveryDetails;
-use App\Repository\DeliveryDetailsRepository;
+use App\Entity\DeliveryLocationPrice;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\DeliveryLocationPriceRepository;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -26,7 +27,7 @@ class DeliveryLocationPriceController extends AbstractController
     #[Route('/api/v1/location-price', name: 'app_delivery_location_price', methods: ['POST'])]
     public function addLocationPrice(
         Request $request,
-        DeliveryDetailsRepository $repo,
+        DeliveryLocationPriceRepository $repo,
         SerializerInterface $serializer,
         ValidatorInterface $validator
     ): JsonResponse {
@@ -36,7 +37,7 @@ class DeliveryLocationPriceController extends AbstractController
 
         try {
             $data = $request->getContent();
-            $addLocationPrice = $serializer->deserialize($data, DeliveryDetails::class, 'json');
+            $addLocationPrice = $serializer->deserialize($data, DeliveryLocationPrice::class, 'json');
             $errors = $validator->validate($addLocationPrice);
 
             if (count($errors) > 0) {
@@ -56,7 +57,7 @@ class DeliveryLocationPriceController extends AbstractController
     }
 
     #[Route('/api/v1/location-price', name: 'app_get_location_price', methods: ['GET'])]
-    public function retrieveAllLocationPrice(DeliveryDetailsRepository $repo, SerializerInterface $serializer): JsonResponse
+    public function retrieveAllLocationPrice(DeliveryLocationPriceRepository $repo, SerializerInterface $serializer): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return new JsonResponse(['message' => 'Access denied'], 403);
@@ -78,7 +79,7 @@ class DeliveryLocationPriceController extends AbstractController
     }
 
     #[Route('/api/v1/location-price/{id}', name: 'app_get_location_price_single', methods: ['GET'])]
-    public function retrieveLocationPriceById(int $id, DeliveryDetailsRepository $repo,): JsonResponse
+    public function retrieveLocationPriceById(int $id, DeliveryLocationPriceRepository $repo,): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return new JsonResponse(['message' => 'Access denied'], 403);
@@ -106,7 +107,7 @@ class DeliveryLocationPriceController extends AbstractController
     public function updateLocationPrice(
         int $id,
         Request $request,
-        DeliveryDetailsRepository $repo,
+        DeliveryLocationPriceRepository $repo,
         SerializerInterface $serializer,
         ValidatorInterface $validator
     ): JsonResponse {
@@ -122,7 +123,7 @@ class DeliveryLocationPriceController extends AbstractController
             }
 
             $data = $request->getContent();
-            $serializer->deserialize($data, DeliveryDetails::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $existingLocationPrice]);
+            $serializer->deserialize($data, DeliveryLocationPrice::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $existingLocationPrice]);
 
             $errors = $validator->validate($existingLocationPrice);
 

@@ -2,21 +2,21 @@
 
 namespace App\Repository;
 
-use App\Entity\DeliveryLocationDetails;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Entity\DeliveryLocationPrice;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<DeliveryPointDetails>
  */
-class DeliveryLocationDetailsRepository extends ServiceEntityRepository
+class DeliveryLocationPriceRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, DeliveryLocationDetails::class);
+        parent::__construct($registry, DeliveryLocationPrice::class);
     }
 
-    public function save(DeliveryLocationDetails $entity, bool $flush = false): void
+    public function save(DeliveryLocationPrice $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -27,7 +27,7 @@ class DeliveryLocationDetailsRepository extends ServiceEntityRepository
 
 
 
-    public function remove(DeliveryLocationDetails $entity, bool $flush = false): void
+    public function remove(DeliveryLocationPrice $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 

@@ -86,7 +86,7 @@ class ProfileSettingController extends AbstractController
             $userProfile = $user->getUserProfile();
 
             if (!$userProfile) {
-                return new JsonResponse(['message' => 'User profile not found'], 404);
+                return new JsonResponse(['message' => 'User profile not found'], 200);
             }
 
             $profileData = [

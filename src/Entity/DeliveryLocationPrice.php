@@ -2,12 +2,11 @@
 
 namespace App\Entity;
 
-use DateTime;
-use App\Repository\DeliveryDetailsRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\DeliveryLocationPriceRepository;
 
-#[ORM\Entity(repositoryClass: DeliveryDetailsRepository::class)]
-class DeliveryDetails
+#[ORM\Entity(repositoryClass: DeliveryLocationPriceRepository::class)]
+class DeliveryLocationPrice
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -20,6 +19,10 @@ class DeliveryDetails
     private ?string $location = null;
     #[ORM\Column(length: 255)]
     private ?string $deliveryFee = null;
+
+
+
+
 
     public function getId(): ?int
     {
