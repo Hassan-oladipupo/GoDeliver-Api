@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use Exception;
 use Psr\Log\LoggerInterface;
-use App\Entity\DeliveryDetails;
 use App\Entity\DeliveryLocationPrice;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -67,7 +66,7 @@ class DeliveryLocationPriceController extends AbstractController
             $locationPrice = $repo->findAll();
             $riderData = $serializer->serialize($locationPrice, 'json', [
                 AbstractNormalizer::ATTRIBUTES => [
-                    'id',  'state', 'location', 'deliveryFee',
+                    'id', 'state', 'location', 'deliveryFee',
                 ],
             ]);
 
@@ -79,7 +78,7 @@ class DeliveryLocationPriceController extends AbstractController
     }
 
     #[Route('/api/v1/location-price/{id}', name: 'app_get_location_price_single', methods: ['GET'])]
-    public function retrieveLocationPriceById(int $id, DeliveryLocationPriceRepository $repo,): JsonResponse
+    public function retrieveLocationPriceById(int $id, DeliveryLocationPriceRepository $repo): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return new JsonResponse(['message' => 'Access denied'], 403);
@@ -91,7 +90,6 @@ class DeliveryLocationPriceController extends AbstractController
             if (!$existingLocationPrice) {
                 return $this->json(['message' => 'Location price not found'], 404);
             }
-
 
             return $this->json([
                 'message' => 'Price Listed Successfully',
