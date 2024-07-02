@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface;
 use App\Entity\DeliveryDetails;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\OrderDetailsRepository;
+use App\Repository\RiderDetailsRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,9 +30,10 @@ class OrderDetailsController extends AbstractController
     #[Route('api/v1/user-order', name: 'app_order_details', methods: ['POST'])]
     public function createOrder(
         Request $request,
-        EntityManagerInterface $entityManger,
+        EntityManagerInterface $entityManager,
         SerializerInterface $serializer,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        RiderDetailsRepository $riderDetailsRepository
     ): JsonResponse {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return new JsonResponse(['message' => 'User is not authenticated'], 401);
@@ -41,68 +43,33 @@ class OrderDetailsController extends AbstractController
 
         try {
             $orderArray = json_decode($data, true);
-            $createOrder = $serializer->deserialize($data, OrderDetails::class, 'json');
+            $createOrder = $serializer->deserialize($data, OrderDetails::class, 'json', [AbstractNormalizer::GROUPS => ['order']]);
 
-            if (isset($orderArray['rider'])) {
-                $rider = $serializer->deserialize(json_encode($orderArray['rider']), RiderDetails::class, 'json');
+
+
+            if (isset($orderArray['riderId'])) {
+                $rider = $riderDetailsRepository->find($orderArray['riderId']);
+                if (!$rider) {
+                    return new JsonResponse(['message' => 'Rider not found'], 404);
+                }
                 $createOrder->setRider($rider);
-                $entityManger->persist($rider);
+            } else {
+                return new JsonResponse(['message' => 'Rider ID is required'], 400);
             }
-
-            $createOrder->setOrderStatus('pending');
-
             $errors = $validator->validate($createOrder);
             if (count($errors) > 0) {
                 return $this->json(['errors' => (string) $errors], 422);
             }
 
             $createOrder->setUser($this->getUser());
+            $entityManager->persist($createOrder);
+            $entityManager->flush();
 
-            $entityManger->persist($createOrder);
-            $entityManger->flush();
+            $responseData = $serializer->serialize($createOrder, 'json', [AbstractNormalizer::GROUPS => ['order:read']]);
 
-            return $this->json(['message' => 'Order Created Successfully', 'order_data' => $createOrder], 201);
+            return new JsonResponse(['message' => 'Order Created Successfully', 'order_data' => json_decode($responseData)], 201);
         } catch (Exception $e) {
             $this->logger->error('An error occurred: ' . $e->getMessage(), ['exception' => $e]);
-            return $this->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
-        }
-    }
-
-    #[Route('/api/v1/user-orders', name: 'app_user_orders', methods: ['GET'])]
-    public function retrieveUserOrders(Request $request, OrderDetailsRepository $repo, SerializerInterface $serializer): JsonResponse
-    {
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return new JsonResponse(['message' => 'User is not authenticated'], 401);
-        }
-
-        try {
-            $user = $this->getUser();
-            $page = $request->query->getInt('page', 1);
-            $limit = $request->query->getInt('limit', 10);
-
-            $offset = ($page - 1) * $limit;
-
-            $orders = $repo->findBy(['user' => $user], null, $limit, $offset);
-
-            $totalOrders = $repo->count(['user' => $user]);
-
-            $orderData = $serializer->serialize($orders, 'json', [
-                AbstractNormalizer::ATTRIBUTES => [
-                    'customerInfo', 'customerName', 'pickupContactNo', 'pickupAddress',
-                    'riderInfo' => ['id', 'riderName', 'riderContactNo', 'vehicleDetails', 'currentLocation'],
-                ],
-            ]);
-
-            $response = [
-                'total_order' => $totalOrders,
-                'page' => $page,
-                'limit' => $limit,
-                'orders' => json_decode($orderData, true),
-            ];
-
-            return $this->json($response, 200);
-        } catch (Exception $e) {
-            $this->logger->error('An error occurred: ' . $e->getMessage());
             return $this->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }

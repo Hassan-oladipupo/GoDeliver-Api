@@ -3,18 +3,23 @@
 namespace App\Repository;
 
 use App\Entity\RiderDetails;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Psr\Log\LoggerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<RiderDetails>
  */
 class RiderDetailsRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private $logger;
+    public function __construct(ManagerRegistry $registry, LoggerInterface $logger)
     {
         parent::__construct($registry, RiderDetails::class);
+        $this->logger = $logger;
     }
+
+
 
     public function save(RiderDetails $entity, bool $flush = false): void
     {
@@ -36,6 +41,21 @@ class RiderDetailsRepository extends ServiceEntityRepository
         }
     }
 
+    public function findById($id): ?RiderDetails
+    {
+        $rider = $this->createQueryBuilder('r')
+            ->leftJoin('r.orders', 'o') // Include related orders if needed
+            ->addSelect('o')
+            ->where('r.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        // Debug: Log the fetched rider details
+        $this->logger->info('Fetched Rider from Repository', ['rider' => $rider]);
+
+        return $rider;
+    }
     //    /**
     //     * @return RiderDetails[] Returns an array of RiderDetails objects
     //     */

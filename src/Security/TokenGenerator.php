@@ -20,7 +20,7 @@ class TokenGenerator
         $user->setResetToken($token);
 
         $expiresAt = new \DateTime();
-        $expiresAt->modify('+1 hour');
+        $expiresAt->modify('+2 hour');
         $user->setResetTokenExpiresAt($expiresAt);
 
         $this->entityManager->flush();

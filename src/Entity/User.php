@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -15,15 +16,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['order:read', 'user:read', 'user:write'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180, unique: true)]
+    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    #[Groups(['order:read', 'user:read', 'user:write'])]
     private ?string $username = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['order:read', 'user:read', 'user:write'])]
     private ?string $firstName = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['order:read', 'user:read', 'user:write'])]
     private ?string $lastName = null;
 
     #[ORM\Column(type: 'json')]
@@ -49,6 +54,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'boolean')]
     private bool $confirmed = false;
+
+
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: OrderDetails::class)]
     private Collection $orderDetails;

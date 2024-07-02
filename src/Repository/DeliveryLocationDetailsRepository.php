@@ -6,7 +6,10 @@ use App\Entity\DeliveryLocationPrice;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class DeliveryLocationPriceRepository extends ServiceEntityRepository
+/**
+ * @extends ServiceEntityRepository<DeliveryLocationPrice>
+ */
+class DeliveryLocationDetailsRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
